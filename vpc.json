@@ -1,0 +1,95 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {
+
+    },
+    "Parameters": {
+
+    },
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {"devvpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "Tags": [{ "Key": "Name", "Value":  "devvpc" }]
+      }
+    },
+    "devvpcigw": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [{ "Key": "Name", "Value":  "devvpcigw" }]
+      }
+    },
+    "AttachGateway": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": { "Ref": "devvpc" },
+        "InternetGatewayId": { "Ref": "devvpcigw" }
+      }
+    },
+    "devvpcpubrtb": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": { "Ref": "devvpc" },
+        "Tags": [{ "Key": "Name", "Value":  "devvpcpubrtb" }]
+      }
+    },
+    "devvpcpubrt": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": { "Ref": "devvpcpubrtb" },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": { "Ref": "devvpcigw" }
+      }
+    },
+    "pubsubassoc": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": { "Ref": "pubsub1" },
+        "RouteTableId": { "Ref": "devvpcpubrtb" }
+      }
+    },
+    "pubsub1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": "us-east-1a",
+        "VpcId": { "Ref": "devvpc" },
+        "CidrBlock": "10.0.1.0/24",
+        "Tags": [{ "Key": "Name", "Value":  "pubsub1" }]
+      }
+    },
+    "devvpcprivatertb": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": { "Ref": "devvpc" },
+        "Tags": [{ "Key": "Name", "Value":  "devvpcprivatertb" }]
+      }
+    },
+
+    "privatesubassoc": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": { "Ref": "privatesub1" },
+        "RouteTableId": { "Ref": "devvpcprivatertb" }
+      }
+    },
+  "privatesub1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": "us-east-1a",
+        "VpcId": { "Ref": "devvpc" },
+        "CidrBlock": "10.0.2.0/24",
+        "Tags": [{ "Key": "Name", "Value":  "privatesub1" }]
+      }
+    }
+  },
+    "Outputs": {
+
+    }
+}

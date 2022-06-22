@@ -1,0 +1,84 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "",
+	"Metadata": {
+    
+        },
+        "Parameters": {
+        
+        },
+        "Mappings": {
+    
+        },
+        "Conditions": {
+    
+        },
+        "Resources": {
+    
+    "secondvpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.1.0.0/16",
+        "Tags": [{ "Key": "name", "Value":  "secondvpc" }]
+      }
+    },
+    "secondvpcigw": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+      "Tags":[{ "Key": "name", "Value":  "secondvpcigw" }]
+      }
+    },
+    "AttachGateway": {
+          "Type": "AWS::EC2::VPCGatewayAttachment",
+          "Properties": {
+            "VpcId": { "Ref": "secondvpc" },
+            "InternetGatewayId": { "Ref": "secondvpcigw" }
+     }
+    },
+    "secondvpcrtb": {
+      "Type": "AWS::EC2::Routetable",
+      "Properties": {
+        "VpcId": "secondvpc",
+        "Tags":[{ "Key": "name", "Value":  "secondvpcrtb" }]
+      }
+    },
+    "secondvpcpubrtb": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+      "RouteTableId": { "Ref": "econdvpcpubrtbs" },
+       "DestinationCidrBlock": "0.0.0.0.0/0",
+        "GatewayId": { "Ref": "secondvpcigw" }
+      }
+    },
+    "pubroutass": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": 
+        { "Ref": "secondvpcpubsub" },
+        "RouteTableId": { "Ref": "pubroutass" }
+        }
+    },
+    "secondvpcpubsub": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": "us-east-1",
+        "VpcId": { "Ref": "secondvpc" },
+        "CidrBlock": "10.0.1.0/18",
+      "Tags":[{ "Key": "name", "Value":  "secondvpcpubsub" }]
+      }
+    },
+    "secondvpcprisub": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": "us-east-1",
+        "VpcId": { "Ref": "secondvpc" },
+        "CidrBlock": "10.0.2.0/18",
+      "Tags":[{ "Key": "name", "Value":  "secondvpcprisub" }]
+      }
+    },
+   
+   "Outputs": {
+    
+     }
+  }
+}

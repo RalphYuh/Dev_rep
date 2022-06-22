@@ -1,0 +1,150 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "",
+	"Metadata": {
+
+	},
+	"Parameters": {"vpccidr": {
+      "Description": "This is for my cidr block",
+      "Type": "String"
+  },
+  "pubsub1cidr": {
+      "Description": "This is my pubsub1",
+      "Type": "String"
+  },
+  "privatesub1cidr": {
+      "Description": "This is my privatesub1",
+      "Type": "String"
+  },
+  "AZA": {
+      "Description": "This is my availability zone A",
+      "Type": "AWS::EC2::AvailabilityZone::Name"
+  },
+  "AZB": {
+        "Description": "This is my availability zone B",
+        "Type": "AWS::EC2::AvailabilityZone::Name"
+  },
+  "KeyPair": {
+      "Description": "This is my KeyPair",
+      "Type": "AWS::EC2::KeyPair::KeyName"
+  },
+  "ImageID": {
+      "Description": "This is my Image",
+      "Type": "AWS::EC2::Image::Id"
+  },
+  "WebserverInstanceType": {
+      "Description": "EC2 instance type for  webserver Server",
+      "Type": "String",
+      "Default": "t2.medium",
+      "AllowedValues": ["t1.micro", "t2.micro", "t2.small", "t2.medium", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge"],
+      "ConstraintDescription": "must be a valid EC2 instance type."
+    }
+  },
+
+	"Mappings": {
+
+	},
+	"Conditions": {
+
+	},"Resources": { "devvpc": {
+			"Type": "AWS::EC2::VPC",
+			"Properties": {
+				"CidrBlock": {"Ref": "vpccidr"},
+				"Tags": [{"Key": "Name","Value": "devvpc"}]
+		},
+		"devvpcigw": {
+			"Type": "AWS::EC2::InternetGateway",
+			"Properties": {
+				"Tags": [{"Key": "Name","Value": "devvpcigw"}]
+		},
+		"AttachGateway": {
+			"Type": "AWS::EC2::VPCGatewayAttachment",
+			"Properties": {
+				"VpcId": {
+					"Ref": "devvpc"
+				"InternetGatewayId": {"Ref": "devvpcigw"}
+		},
+		"devvpcpubrtb": {
+			"Type": "AWS::EC2::RouteTable",
+			"Properties": {
+				"VpcId": {
+					"Ref": "devvpc"
+				"Tags":[{ "Key": "Name", "Value":  "devvpcpubrtb" }]
+		},
+		"devvpcpubrt": {
+			"Type": "AWS::EC2::Route",
+			"Properties": {
+				"RouteTableId": {
+					"Ref": "devvpcpubrtb"
+				},
+				"DestinationCidrBlock": "0.0.0.0/0",
+				"GatewayId": {
+					"Ref": "devvpcigw"
+    },
+		"pubsubassoc": {
+			"Type": "AWS::EC2::SubnetRouteTableAssociation",
+			"Properties": {
+				"SubnetId": {
+					"Ref": "pubsub1"
+	"RouteTableId": {"Ref": "devvpcpubrtb"}
+		
+        },
+		"pubsub1": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": { "Ref": "AZA" },
+				"VpcId": {"Ref": "devvpc"	},
+				"CidrBlock": { "Ref": "pubsub1cidr" },
+				"Tags": [{"Key": "Name","Value": "pubsub1"}]
+		},
+		"devvpcprivatertb": {
+			"Type": "AWS::EC2::RouteTable",
+			"Properties": {
+				"VpcId": {
+					"Ref": "devvpc"	},
+				"Tags": [{"Key": "Name","Value": "devvpcprivatertb"}]
+		},
+    "privatesubassoc": {
+			"Type": "AWS::EC2::SubnetRouteTableAssociation",
+			"Properties": {
+				"SubnetId": {"Ref": "privatesub1"
+		"RouteTableId": {"Ref": "devvpcprivatertb"}
+		},
+		"privatesub1": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": { "Ref": "AZB" },
+				"VpcId": {"Ref": "devvpc"},
+				"CidrBlock": {"Ref": "privatesub1cidr"},
+				"Tags": [{"Key": "Name","Value": "privatesub1"}]
+	},
+  "InstanceSecurityGroup" : {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+            "GroupDescription" : "Allow http to client host",
+            "VpcId" : {"Ref" : "devvpc"},
+            "SecurityGroupIngress" : [{
+                "IpProtocol" : "tcp",
+                "FromPort" : 80,
+                "ToPort" : 80,
+                "CidrIp" : "0.0.0.0/0"
+                }]
+            }
+          },
+          "web1": {
+              "Type": "AWS::EC2::Instance",
+              "Properties": {
+                  "KeyName": { "Ref": "KeyPair" },
+                  "SubnetId" :{ "Ref": "pubsub1" },
+                  "DisableApiTermination": "true",
+                  "ImageId": { "Ref": "ImageID" },
+                  "InstanceType": { "Ref": "WebserverInstanceType" },
+                  "Monitoring": "true",
+                  "SecurityGroupIds" : [{ "Ref": "InstanceSecurityGroup" }],
+                  "Tags": [{"Key": "Name", "Value": "web1"}]
+    },
+
+	"Outputs": {
+  }
+	}
+},
